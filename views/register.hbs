@@ -1,0 +1,30 @@
+{{> header }}
+<div class="container">
+<h1>{{title}}</h1>
+
+    
+        <form method="POST" action="/register">
+            <div class="form-group">
+                <label for="name">Namn</label>
+                <input type="name" name="name" class="form-control" placeholder="För- och efternamn">
+
+                <div class="form-group">
+                <label for="email">Epostadress</label>
+                <input type="email" name="email" class="form-control" placeholder="xxxx@mail.se">
+                
+            </div>
+            <div class="form-group">
+                <label for="password">Lösenord</label>
+                <input type="password" name="password" class="form-control" placeholder="Lösenord">
+            </div>
+
+            <div class="form-group">
+                <label for="passwordMatch">Lösenord</label>
+                <input type="password" name="passwordMatch" class="form-control" placeholder="Lösenord upprepning">
+            </div>
+            <button type="submit" class="btn btn-primary">Godkänn</button>
+        </form>
+    </div>
+
+
+{{> footer-end }}
