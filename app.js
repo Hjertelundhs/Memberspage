@@ -5,6 +5,13 @@ let logger = require('morgan');
 let cookieParser = require('cookie-parser');
 let bodyParser = require('body-parser');
 let expressValidator = require('express-validator');
+
+//Authentication packages
+
+let session = require('express-session');
+let passport = require('passport');
+
+
 let index = require('./routes/index');
 let users = require('./routes/users');
 
@@ -26,6 +33,17 @@ app.use(expressValidator());
 
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+app.use(session({
+  secret: 'Fefesdddd4.&',
+  resave: false,
+  saveUninitialized: false,
+  //cookie: { secure: true }
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
 
 app.use('/', index);
 app.use('/users', users);

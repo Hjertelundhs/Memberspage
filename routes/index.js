@@ -1,9 +1,14 @@
 let express = require('express');
 let router = express.Router();
 let expressValidator = require('express-validator');
+let passport = require('passport');
 let bcrypt = require('bcryptjs');
 
 /* GET home page. */
+router.get('/', function(req, res) {
+  res.render('home', { title: 'Hem' });
+});
+
 router.get('/register', function(req, res, next) {
   res.render('register', { title: 'Registrering' });
 });
@@ -41,12 +46,32 @@ router.post('/register', function(req, res, next) {
           const db = require('../db.js');
           db.query('INSERT INTO users (name, email, password) VALUES (?, ?, ?)', [name, email, hash], function(error, results, fields) {
             if(error) throw error;
-            res.render('register', { title: 'Registrering genomförd' });
+
+            db.query('SELECT LAST_INSERT_ID() as user_id', function(error, results, fields) {
+              
+              let user_id = results[0];
+
+              if(error) throw error;
+              console.log(user_id);
+              req.login(user_id, function(error) {
+                res.redirect('/');
+              });
+
+              res.render('register', { title: 'Registrering genomförd' });
+              
+              });
+            
             });
           }
-
-
   
-});
+    });
+
+    passport.serializeUser(function(user_id, done) {
+      done(null, user_id);
+    });
+    
+    passport.deserializeUser(function(user_id, done) {
+        done(null, user_id);
+    });
 
 module.exports = router;
