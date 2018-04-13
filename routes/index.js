@@ -6,8 +6,26 @@ let bcrypt = require('bcryptjs');
 
 /* GET home page. */
 router.get('/', function(req, res) {
+
+  console.log(req.user + " user");
+  console.log(req.isAuthenticated() + " goody");
+  
   res.render('home', { title: 'Hem' });
 });
+
+router.get('/profile', authenticationMiddleware(), function(req, res)  {
+  res.render('profile', { title: 'Din sida' });
+});
+
+router.get('/login', function(req, res)  {
+  res.render('login', { title: 'Logga in' });
+});
+
+router.post('/login', passport.authenticate('local', {
+  successRedirect: '/profile',
+  failureRedirect: '/login'
+}));
+
 
 router.get('/register', function(req, res, next) {
   res.render('register', { title: 'Registrering' });
@@ -15,7 +33,7 @@ router.get('/register', function(req, res, next) {
 
 router.post('/register', function(req, res, next) {
   req.checkBody('name', 'Namn saknas i fälltet. ').notEmpty();
-  req.checkBody('name', 'Namnet för bara innehålla bokstäver, mellanrum och bindesträck. ').matches(/^[A-Za-z--- ]+$/, 'i');
+  req.checkBody('name', 'Namnet för bara innehålla bokstäver, mellanrum och bindesträck. ').matches(/^[A-Öa-ö--- ]+$/, 'i');
   req.checkBody('name', 'Namnen måste vara mellan 4 och 25 bokstäver. ').len(4, 25);
   req.checkBody('email', 'Epostadressen är ogiltig, vänligen försök igen.').isEmail();
   req.checkBody('email', 'Epostadressen ska vara mellan 4 och 100 tecken lång. ').len(4, 100);
@@ -41,18 +59,18 @@ router.post('/register', function(req, res, next) {
           //Hash the password before db entry
           let salt = bcrypt.genSaltSync(10);
           let hash = bcrypt.hashSync(password, salt);
-          console.log(hash);
+          console.log(hash + "hashed password");
           
           const db = require('../db.js');
           db.query('INSERT INTO users (name, email, password) VALUES (?, ?, ?)', [name, email, hash], function(error, results, fields) {
             if(error) throw error;
 
-            db.query('SELECT LAST_INSERT_ID() as user_id', function(error, results, fields) {
+            db.query('SELECT id LAST_INSERT_ID() as user_id', function(error, results, fields) {
               
               let user_id = results[0];
-
+              console.log(results[0] + results[0].id);
               if(error) throw error;
-              console.log(user_id);
+              
               req.login(user_id, function(error) {
                 res.redirect('/');
               });
@@ -73,5 +91,14 @@ router.post('/register', function(req, res, next) {
     passport.deserializeUser(function(user_id, done) {
         done(null, user_id);
     });
+
+    function authenticationMiddleware () {  
+      return (req, res, next) => {
+        console.log(`req.session.passport.user: ${JSON.stringify(req.session.passport)}`);
+    
+          if (req.isAuthenticated()) return next();
+          res.redirect('/login')
+      }
+    }
 
 module.exports = router;

@@ -7,10 +7,11 @@ let bodyParser = require('body-parser');
 let expressValidator = require('express-validator');
 
 //Authentication packages
-
 let session = require('express-session');
 let passport = require('passport');
-
+let LocalStrategy = require('passport-local').Strategy;
+let MySQLStore = require('express-mysql-session')(session);
+let bcrypt = require('bcryptjs');
 
 let index = require('./routes/index');
 let users = require('./routes/users');
@@ -34,9 +35,19 @@ app.use(expressValidator());
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+var options = {
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database : process.env.DB_NAME
+};
+
+var sessionStore = new MySQLStore(options);
+
 app.use(session({
-  secret: 'Fefesdddd4.&',
+  secret: 'Fefesdd34235232324_432gfc',
   resave: false,
+  store: sessionStore,
   saveUninitialized: false,
   //cookie: { secure: true }
 }));
@@ -47,6 +58,42 @@ app.use(passport.session());
 
 app.use('/', index);
 app.use('/users', users);
+
+passport.use(new LocalStrategy({
+
+  usernameField: 'email',
+  passwordField: 'password'
+},
+
+  function(req, username, password, done) {
+      
+      console.log(username + ' username');
+      console.log(password + ' password');
+      
+      const db = require('./db');
+      db.query('SELECT user_id, password FROM users WHERE email = ?', [username], function(err, results, fields)  {
+        
+        if(err) {done(err)};
+        
+        if(results.length === 0)  {
+          done(null, false);
+        } else  {
+
+        let hash = results[0].password.toString();
+        
+        bcrypt.compare(password, hash, function(err, response)  {
+          if(response === true) {
+            console.log(results[0].user_id)
+            return done(null, {user_id: results[0].user_id});
+          } else  {
+            return done(null, 'false');
+            }
+         });
+        }
+      })  
+    }
+));
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
