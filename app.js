@@ -55,6 +55,10 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
+app.use(function(req, res, next)  {
+  res.locals.isAuthenticated = req.isAuthenticated();
+  next();
+})
 
 app.use('/', index);
 app.use('/users', users);
@@ -63,9 +67,10 @@ passport.use(new LocalStrategy({
 
   usernameField: 'email',
   passwordField: 'password'
+
 },
 
-  function(req, username, password, done) {
+  function(username, password, done) {
       
       console.log(username + ' username');
       console.log(password + ' password');
@@ -86,7 +91,7 @@ passport.use(new LocalStrategy({
             console.log(results[0].user_id)
             return done(null, {user_id: results[0].user_id});
           } else  {
-            return done(null, 'false');
+            return done(null, false);
             }
          });
         }

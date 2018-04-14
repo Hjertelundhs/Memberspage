@@ -20,17 +20,23 @@
         <nav>
           <ul class="nav nav-pills float-right">
             <li class="nav-item">
-              <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
+              <a class="nav-link" href="/">Hem <span class="sr-only">(current)</span></a>
             </li>
+            {{#if isAuthenticated}}
             <li class="nav-item">
-              <a class="nav-link" href="/register">Registrera</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="/login">Inloggning</a>
+              <a class="nav-link" href="/logout">Logga ut</a>
             </li>
             <li class="nav-item">
               <a class="nav-link" href="/profile">Profil</a>
             </li>
+            {{else}}
+              <li class="nav-item">
+              <a class="nav-link" href="/register">Registrera</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/login">Logga in</a>
+            </li>
+            {{/if}}
           </ul>
         </nav>
         <h3 class="text-muted">Project name</h3>
