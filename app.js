@@ -76,14 +76,14 @@ passport.use(new LocalStrategy({
       console.log(password + ' password');
       
       const db = require('./db');
-      db.query('SELECT user_id, password FROM users WHERE email = ?', [username], function(err, results, fields)  {
-        
+      db.query('SELECT user_id, password, is_admin FROM users WHERE email = ?', [username], function(err, results, fields)  {
+        const is_admin = results[0].is_admin;
         if(err) {done(err)};
         
         if(results.length === 0)  {
           done(null, false);
         } else  {
-
+        
         let hash = results[0].password.toString();
         
         bcrypt.compare(password, hash, function(err, response)  {

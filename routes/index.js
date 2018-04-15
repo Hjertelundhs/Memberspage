@@ -8,7 +8,7 @@ let bcrypt = require('bcryptjs');
 router.get('/', function(req, res) {
 
   console.log(req.user + " user");
-  console.log(req.isAuthenticated() + " goody");
+  console.log(req.isAuthenticated() + " inloggad");
   
   res.render('home', { title: 'Hem' });
 });
@@ -71,10 +71,10 @@ router.post('/register', function(req, res, next) {
           db.query('INSERT INTO users (name, email, password) VALUES (?, ?, ?)', [name, email, hash], function(error, results, fields) {
             if(error) throw error;
 
-            db.query('SELECT id LAST_INSERT_ID() as user_id', function(error, results, fields) {
+            db.query('SELECT LAST_INSERT_ID(user_id) from users as user_id', function(error, result, fields) {
               
               let user_id = results[0];
-              console.log(results[0] + results[0].id);
+              
               if(error) throw error;
               
               req.login(user_id, function(error) {
