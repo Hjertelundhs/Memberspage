@@ -55,7 +55,7 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use(function(req, res, next)  {
+app.use((req, res, next) => {
   res.locals.isAuthenticated = req.isAuthenticated();
   next();
 })
@@ -70,23 +70,24 @@ passport.use(new LocalStrategy({
 
 },
 
-  function(username, password, done) {
+  (username, password, done) => {
       
       console.log(username + ' username');
       console.log(password + ' password');
       
       const db = require('./db');
-      db.query('SELECT user_id, password, is_admin FROM users WHERE email = ?', [username], function(err, results, fields)  {
-        const is_admin = results[0].is_admin;
+      db.query('SELECT user_id, password, name FROM users WHERE email = ?', [username], (err, results, fields) =>  {
+      
         if(err) {done(err)};
         
         if(results.length === 0)  {
           done(null, false);
         } else  {
-        
+        name = results[0].name;
+        console.log(name + 'name')
         let hash = results[0].password.toString();
         
-        bcrypt.compare(password, hash, function(err, response)  {
+        bcrypt.compare(password, hash, (err, response) => {
           if(response === true) {
             console.log(results[0].user_id)
             return done(null, {user_id: results[0].user_id});

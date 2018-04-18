@@ -3,21 +3,21 @@ let router = express.Router();
 let expressValidator = require('express-validator');
 let passport = require('passport');
 let bcrypt = require('bcryptjs');
-
+require('../app.js')
 /* GET home page. */
-router.get('/', function(req, res) {
+router.get('/', (req, res) => {
 
-  console.log(req.user + " user");
+ 
   console.log(req.isAuthenticated() + " inloggad");
   
   res.render('home', { title: 'Hem' });
 });
 
-router.get('/profile', authenticationMiddleware(), function(req, res)  {
-  res.render('profile', { title: 'Din sida' });
+router.get('/profile', authenticationMiddleware(), (req, res) => {
+  res.render('profile', { title: 'Din sida', name: name});
 });
 
-router.get('/login', function(req, res)  {
+router.get('/login', (req, res) => {
   res.render('login', { title: 'Logga in' });
 });
 
@@ -26,18 +26,18 @@ router.post('/login', passport.authenticate('local', {
   failureRedirect: '/login'
 }));
 
-router.get('/logout', function(req, res)  {
+router.get('/logout', (req, res) => {
   req.logout();
   req.session.destroy();
   res.redirect('/')
 });
 
 
-router.get('/register', function(req, res, next) {
+router.get('/register', (req, res, next) => {
   res.render('register', { title: 'Registrering' });
 });
 
-router.post('/register', function(req, res, next) {
+router.post('/register', (req, res, next) => {
   req.checkBody('name', 'Namn saknas i fälltet. ').notEmpty();
   req.checkBody('name', 'Namnet för bara innehålla bokstäver, mellanrum och bindesträck. ').matches(/^[A-Öa-ö--- ]+$/, 'i');
   req.checkBody('name', 'Namnen måste vara mellan 4 och 25 bokstäver. ').len(4, 25);
@@ -68,16 +68,17 @@ router.post('/register', function(req, res, next) {
           console.log(hash + "hashed password");
           
           const db = require('../db.js');
-          db.query('INSERT INTO users (name, email, password) VALUES (?, ?, ?)', [name, email, hash], function(error, results, fields) {
+          db.query('INSERT INTO users (name, email, password) VALUES (?, ?, ?)', [name, email, hash], (error, results, fields) => {
             if(error) throw error;
-
-            db.query('SELECT LAST_INSERT_ID(user_id) from users as user_id', function(error, result, fields) {
+           
+           
+            db.query('SELECT LAST_INSERT_ID(user_id) from users as user_id', (error, result, fields) => {
               
               let user_id = results[0];
               
               if(error) throw error;
               
-              req.login(user_id, function(error) {
+              req.login(user_id, (error) => {
                 res.redirect('/');
               });
 
@@ -90,11 +91,11 @@ router.post('/register', function(req, res, next) {
   
     });
 
-    passport.serializeUser(function(user_id, done) {
+    passport.serializeUser((user_id, done) => {
       done(null, user_id);
     });
     
-    passport.deserializeUser(function(user_id, done) {
+    passport.deserializeUser((user_id, done) => {
         done(null, user_id);
     });
 
