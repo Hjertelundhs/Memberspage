@@ -4,6 +4,7 @@ let expressValidator = require('express-validator');
 let passport = require('passport');
 let bcrypt = require('bcryptjs');
 require('../app.js')
+
 /* GET home page. */
 router.get('/', (req, res) => {
 
@@ -14,6 +15,11 @@ router.get('/', (req, res) => {
 });
 
 router.get('/profile', authenticationMiddleware(), (req, res) => {
+    let db = require('../db.js');
+    db.query('SELECT is_admin FROM users WHERE email = ?', [user_id], (error, results, fields) =>  {
+    let isAdmin = results[0].is_admin;
+    console.log(isAdmin + ' admin')
+  })
   res.render('profile', { title: 'Din sida', name: name});
 });
 
@@ -67,14 +73,14 @@ router.post('/register', (req, res, next) => {
           let hash = bcrypt.hashSync(password, salt);
           console.log(hash + "hashed password");
           
-          const db = require('../db.js');
+          
           db.query('INSERT INTO users (name, email, password) VALUES (?, ?, ?)', [name, email, hash], (error, results, fields) => {
             if(error) throw error;
            
-           
+            let db = require('../db.js');
             db.query('SELECT LAST_INSERT_ID(user_id) from users as user_id', (error, result, fields) => {
               
-              let user_id = results[0];
+              var user_id = results[0];
               
               if(error) throw error;
               
@@ -88,8 +94,10 @@ router.post('/register', (req, res, next) => {
             
             });
           }
-  
+          
     });
+
+    
 
     passport.serializeUser((user_id, done) => {
       done(null, user_id);
